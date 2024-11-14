@@ -2,16 +2,14 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Interfaces\UserRepositoryInterface;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Carbon\Carbon;
 
-class TaskRepository implements UserRepositoryInterface
+class TaskRepository implements TaskRepositoryInterface
 {
     /** @return EloquentCollection<int, Task> */
     public function index(): EloquentCollection
