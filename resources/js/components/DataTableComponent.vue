@@ -95,8 +95,11 @@
         </template>
         <template v-slot:[`item.used_time`]="{ item, value }">
             <v-chip :color="getUsedTimeColor(item)">
-                {{ value }}
+                {{ formatTime(value) }}
             </v-chip>
+        </template>
+        <template v-slot:[`item.estimated_time`]="{ value }">
+            {{ formatTime(value) }}
         </template>
     </v-data-table>
     <v-row v-if="selected.length">
@@ -113,6 +116,7 @@ import { ref, reactive, computed, nextTick } from 'vue'
 import { useTaskStore } from '@/stores/task.store.js';
 import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCountedTimesComponent.vue'
 import { useToast } from 'vue-toastification';
+import { formatTime } from '@/utils/formatTime';
 
 const dialog = ref(false)
 const dialogDelete = ref(false)

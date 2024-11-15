@@ -22,7 +22,7 @@
 
 <script setup>
 import { computed } from 'vue';
-
+import { formatTime } from '@/utils/formatTime';
 
 const props = defineProps({
     items: {
@@ -34,12 +34,6 @@ const props = defineProps({
 const totalTimes = computed(() => {
     const totalEstimated = props.items.reduce((sum, item) => sum + item.estimated_time, 0);
     const totalUsed = props.items.reduce((sum, item) => sum + item.used_time, 0);
-    const formatTime = (time) => {
-        const hours = Math.floor(time / 3600);
-        const minutes = Math.floor((time % 3600) / 60);
-        const seconds = time % 60;
-        return `${hours} hour, ${minutes} minute, ${seconds} second`;
-    };
 
     return {
         estimated: formatTime(totalEstimated),
