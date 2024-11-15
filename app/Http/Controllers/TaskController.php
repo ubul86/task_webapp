@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TaskResource;
+use App\Models\Task;
 use App\Repositories\TaskRepository;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,14 +24,14 @@ class TaskController extends Controller
     public function index(): JsonResponse
     {
         $tasks = $this->taskRepository->index();
-        return response()->json($tasks);
+        return response()->json(TaskResource::collection($tasks));
     }
 
     public function show(int $id): JsonResponse
     {
         try {
             $task = $this->taskRepository->show($id);
-            return response()->json($task);
+            return response()->json(new TaskResource($task));
         } catch (Exception $e) {
             return response()->json(['errors' => $e->getMessage()], 404);
         }
@@ -40,7 +42,7 @@ class TaskController extends Controller
         try {
             $validated = $request->validated();
             $task = $this->taskRepository->store($validated);
-            return response()->json($task, 201);
+            return response()->json(new TaskResource($task), 201);
         } catch (Exception $e) {
             return response()->json(['errors' => $e->getMessage()], 400);
         }
@@ -51,7 +53,7 @@ class TaskController extends Controller
         try {
             $validated = $request->validated();
             $task = $this->taskRepository->update($id, $validated);
-            return response()->json($task);
+            return response()->json(new TaskResource($task));
         } catch (ModelNotFoundException $e) {
             return response()->json(['errors' => $e->getMessage()], 404);
         } catch (Exception $e) {
@@ -86,7 +88,7 @@ class TaskController extends Controller
     {
         try {
             $task = $this->taskRepository->setCompleted($id);
-            return response()->json($task);
+            return response()->json(new TaskResource($task));
         } catch (ModelNotFoundException $e) {
             return response()->json(['errors' => $e->getMessage()], 404);
         } catch (Exception $e) {

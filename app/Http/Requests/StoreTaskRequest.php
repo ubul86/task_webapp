@@ -14,6 +14,7 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'user_id' => 'nullable|integer',
             'description' => 'nullable|string',
             'estimated_time' => 'required|integer',
             'used_time' => 'nullable|integer',

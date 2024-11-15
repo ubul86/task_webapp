@@ -14,7 +14,7 @@ class TaskRepository implements TaskRepositoryInterface
     /** @return EloquentCollection<int, Task> */
     public function index(): EloquentCollection
     {
-        return Task::all();
+        return Task::with('user')->get();
     }
 
     public function show(int $id): Task
