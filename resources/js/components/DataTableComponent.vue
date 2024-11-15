@@ -26,7 +26,12 @@
                             <v-container>
                                 <v-row>
                                     <v-col cols="12" >
-                                        <v-text-field v-model="editedItem.description" label="Description"></v-text-field>
+                                        <v-text-field
+                                            v-model="editedItem.description"
+                                            label="Description"
+                                            :error="!!formErrors.description"
+                                            :error-messages="formErrors.description || []"
+                                        ></v-text-field>
                                     </v-col>
                                     <v-col cols="12" >
                                         <v-select
@@ -35,13 +40,25 @@
                                             item-value="id"
                                             item-title="name"
                                             label="Users"
+                                            :error="!!formErrors.user_id"
+                                            :error-messages="formErrors.user_id || []"
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="12" >
-                                        <v-text-field v-model="editedItem.estimated_time" label="Estimated Time"></v-text-field>
+                                        <v-text-field
+                                            v-model="editedItem.estimated_time"
+                                            label="Estimated Time"
+                                            :error="!!formErrors.estimated_time"
+                                            :error-messages="formErrors.estimated_time || []"
+                                        ></v-text-field>
                                     </v-col>
                                     <v-col cols="12" >
-                                        <v-text-field v-model="editedItem.used_time" label="Used Time"></v-text-field>
+                                        <v-text-field
+                                            v-model="editedItem.used_time"
+                                            label="Used Time"
+                                            :error="!!formErrors.used_time"
+                                            :error-messages="formErrors.used_time || []"
+                                        ></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-container>
@@ -117,11 +134,13 @@ import { useTaskStore } from '@/stores/task.store.js';
 import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCountedTimesComponent.vue'
 import { useToast } from 'vue-toastification';
 import { formatTime } from '@/utils/formatTime';
+import useForm from '@/composables/useForm.js';
 
 const dialog = ref(false)
 const dialogDelete = ref(false)
 const dialogCompleted = ref(false)
 const toast = useToast()
+const { formErrors, resetErrors, handleApiError } = useForm();
 
 const taskStore = useTaskStore();
 
@@ -235,6 +254,7 @@ const closeCompleted = async () => {
 }
 
 const save = async () => {
+    resetErrors();
     try {
         if (editedIndex.value > -1) {
             await taskStore.update(editedIndex.value, editedItem);
@@ -246,6 +266,7 @@ const save = async () => {
         close()
     }
     catch(error) {
+        handleApiError(error);
         toast.error(error.response.data.message);
     }
 }
