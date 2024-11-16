@@ -68,3 +68,4 @@ yarn-error.log
 /.idea
 /.vscode
 /cache
+.env.testing
