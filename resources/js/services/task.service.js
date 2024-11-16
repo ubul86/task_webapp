@@ -6,7 +6,6 @@ class TaskService {
             .get("/tasks")
             .then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed to fetch data:", error);
                 throw error;
             });
     }
@@ -14,7 +13,6 @@ class TaskService {
     store(item) {
         return publicApi.post(`/tasks`, item).then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed when store the data:", error);
                 throw error;
             });
     }
@@ -22,7 +20,6 @@ class TaskService {
     update(item) {
         return publicApi.put(`/tasks/${item.id}`, item).then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed when store the data:", error);
                 throw error;
             });
     }
@@ -30,7 +27,6 @@ class TaskService {
     increaseUsedTime(id, time) {
         return publicApi.put(`/tasks/add-used-time-to-task/${id}`, {used_time: time}).then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed when store the data:", error);
                 throw error;
             });
     }
@@ -38,7 +34,6 @@ class TaskService {
     toggleCompletedItem(id) {
         return publicApi.put(`/tasks/toggle-completed/${id}`).then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed when toggle the data to complete:", error);
                 throw error;
             });
     }
@@ -47,7 +42,6 @@ class TaskService {
             .delete(`/tasks/${id}`)
             .then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed to delete data:", error);
                 throw error;
             });
     }
@@ -60,7 +54,6 @@ class TaskService {
             })
             .then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed to delete data:", error);
                 throw error;
             });
     }
@@ -73,7 +66,6 @@ class TaskService {
             })
             .then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed to confirmed data:", error);
                 throw error;
             });
     }
