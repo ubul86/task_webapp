@@ -27,6 +27,14 @@ class TaskService {
             });
     }
 
+    increaseUsedTime(id, time) {
+        return publicApi.put(`/tasks/add-used-time-to-task/${id}`, {used_time: time}).then((response) => response.data.data)
+            .catch((error) => {
+                console.error("Failed when store the data:", error);
+                throw error;
+            });
+    }
+
     toggleCompletedItem(id) {
         return publicApi.put(`/tasks/toggle-completed/${id}`).then((response) => response.data.data)
             .catch((error) => {

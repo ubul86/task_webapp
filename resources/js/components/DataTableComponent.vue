@@ -14,6 +14,42 @@
                 <v-toolbar-title>Tasks</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
+                <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
+                    <v-card>
+                        <v-card-title>
+                            <span class="text-h5">{{ formTitle }}</span>
+                        </v-card-title>
+                        <v-card-text>
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="12">
+                                        <v-row>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                    v-model.number="usedHours"
+                                                    label="Used Hours"
+                                                    type="number"
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                    v-model.number="usedMinutes"
+                                                    label="Used Minutes"
+                                                    type="number"
+                                                ></v-text-field>
+                                            </v-col>
+                                        </v-row>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="blue-darken-1" variant="text" @click="closeIncreasedUsedTime">Cancel</v-btn>
+                            <v-btn color="blue-darken-1" variant="text" @click="saveIncreasedUsedTime">Save</v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
                 <v-dialog v-model="dialog" max-width="500px">
                     <template v-slot:activator="{ props }">
                         <v-btn class="mb-2" color="primary" dark v-bind="props">New Task</v-btn>
@@ -145,6 +181,13 @@
             <v-chip :color="getUsedTimeColor(item)">
                 {{ formatTime(value) }}
             </v-chip>
+            <v-btn
+                color="primary"
+                size="x-small"
+                class="justify-center align-center flex mt-2"
+                v-if="!item.is_completed"
+                @click="openUsedTimeDialog(item)"
+            >Add Time</v-btn>
         </template>
         <template v-slot:[`item.estimated_time`]="{ value }">
             {{ formatTime(value) }}
@@ -175,6 +218,9 @@ const dialogCompletedText = computed(() =>
         ? 'Are you sure you want to set this task to incomplete?'
         : 'Are you sure you want to set this task to complete?'
 );
+
+const dialogIncreasedUsedTime = ref(false);
+
 const toast = useToast()
 const { formErrors, resetErrors, handleApiError } = useForm();
 
@@ -240,6 +286,13 @@ const openToggleCompletedDialog = (item) => {
     dialogCompleted.value = true
 }
 
+const openUsedTimeDialog = (item) => {
+    editedIndex.value = taskStore.tasks.indexOf(item);
+    Object.assign(editedItem, item);
+    editedItem.used_time = 0;
+    dialogIncreasedUsedTime.value = true;
+}
+
 const deleteItem = (item) => {
     editedIndex.value = taskStore.tasks.indexOf(item)
     Object.assign(editedItem, item)
@@ -280,6 +333,13 @@ const close = async () => {
     editedIndex.value = -1
 }
 
+const closeIncreasedUsedTime = async () => {
+    dialogIncreasedUsedTime.value = false
+    await nextTick()
+    Object.assign(editedItem, defaultItem)
+    editedIndex.value = -1
+}
+
 const closeDelete = async () => {
     dialogDelete.value = false
     await nextTick()
@@ -292,6 +352,16 @@ const closeCompleted = async () => {
     await nextTick()
     Object.assign(editedItem, defaultItem)
     editedIndex.value = -1
+}
+
+const saveIncreasedUsedTime = async () => {
+    try {
+        await taskStore.increaseUsedTime(editedItem.id, editedItem.used_time)
+        closeIncreasedUsedTime();
+    }
+    catch (error) {
+        toast.error(error.response.data.message);
+    }
 }
 
 const save = async () => {

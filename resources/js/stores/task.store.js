@@ -46,6 +46,20 @@ export const useTaskStore = defineStore('task', {
             }
         },
 
+        async increaseUsedTime(id, time) {
+            try {
+                const updatedTask = await taskService.increaseUsedTime(id, time);
+                const taskIndex = this.tasks.findIndex(task => task.id === id);
+                if (taskIndex !== -1) {
+                    this.tasks[taskIndex] = updatedTask;
+                }
+            } catch (error) {
+                console.error('Error when set the item to confirmed:', error);
+                throw error;
+            }
+
+        },
+
         async deleteItem(id) {
             try {
                 await taskService.deleteItem(id);
