@@ -33,6 +33,19 @@ class Task extends Model
         return $this;
     }
 
+    public function setUnCompleted(): self
+    {
+        $this->completed_at = null;
+        $this->save();
+
+        return $this;
+    }
+
+    public function isCompleted(): bool
+    {
+        return !is_null($this->completed_at);
+    }
+
     public function getCreatedAtAttribute(?string $value): ?string
     {
         return $value

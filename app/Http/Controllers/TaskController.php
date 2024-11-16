@@ -98,10 +98,10 @@ class TaskController extends Controller
         }
     }
 
-    public function setCompleted(int $id): JsonResponse
+    public function toggleCompleted(int $id): JsonResponse
     {
         try {
-            $task = $this->taskRepository->setCompleted($id);
+            $task = $this->taskRepository->toggleCompleted($id);
             return response()->json(new TaskResource($task));
         } catch (ModelNotFoundException $e) {
             return response()->json(['errors' => $e->getMessage()], 404);
@@ -114,8 +114,8 @@ class TaskController extends Controller
     {
         try {
             $ids = explode(',', $request->input('ids'));
-            $this->taskRepository->setBulkCompleted($ids);
-            return response()->json(['message' => 'Selected tasks set to completed successfully']);
+            $result = $this->taskRepository->setBulkCompleted($ids);
+            return response()->json($result);
         } catch (Exception $e) {
             return response()->json(['errors' => $e->getMessage()], 404);
         }

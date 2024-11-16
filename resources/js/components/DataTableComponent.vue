@@ -44,21 +44,45 @@
                                             :error-messages="formErrors.user_id || []"
                                         ></v-select>
                                     </v-col>
-                                    <v-col cols="12" >
-                                        <v-text-field
-                                            v-model="editedItem.estimated_time"
-                                            label="Estimated Time"
-                                            :error="!!formErrors.estimated_time"
-                                            :error-messages="formErrors.estimated_time || []"
-                                        ></v-text-field>
+                                    <v-col cols="12">
+                                        <v-row>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                    v-model.number="estimatedHours"
+                                                    label="Estimated Hours"
+                                                    type="number"
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                    v-model.number="estimatedMinutes"
+                                                    label="Estimated Minutes"
+                                                    type="number"
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12">
+                                                <span class="text-red">{{ formErrors.estimated_time[0] }}</span>
+                                            </v-col>
+                                        </v-row>
                                     </v-col>
-                                    <v-col cols="12" >
-                                        <v-text-field
-                                            v-model="editedItem.used_time"
-                                            label="Used Time"
-                                            :error="!!formErrors.used_time"
-                                            :error-messages="formErrors.used_time || []"
-                                        ></v-text-field>
+
+                                    <v-col cols="12">
+                                        <v-row>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                    v-model.number="usedHours"
+                                                    label="Used Hours"
+                                                    type="number"
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="6">
+                                                <v-text-field
+                                                    v-model.number="usedMinutes"
+                                                    label="Used Minutes"
+                                                    type="number"
+                                                ></v-text-field>
+                                            </v-col>
+                                        </v-row>
                                     </v-col>
                                 </v-row>
                             </v-container>
@@ -83,11 +107,13 @@
                 </v-dialog>
                 <v-dialog v-model="dialogCompleted" max-width="500px">
                     <v-card>
-                        <v-card-title class="text-h5">Are you sure you set this task to complete?</v-card-title>
+                        <v-card-title class="text-h5">
+                            {{ dialogCompletedText }}
+                        </v-card-title>
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="blue-darken-1" variant="text" @click="closeCompleted">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="setCompletedConfirm">OK</v-btn>
+                            <v-btn color="blue-darken-1" variant="text" @click="toggleCompletedConfirm">OK</v-btn>
                             <v-spacer></v-spacer>
                         </v-card-actions>
                     </v-card>
@@ -96,7 +122,12 @@
         </template>
         <template v-slot:[`item.actions`]="{ item }">
             <v-icon class="me-2" size="small" @click="editItem(item)">mdi-pencil</v-icon>
-            <v-icon class="me-2" size="small" @click="setCompletedItem(item)">mdi-check</v-icon>
+            <v-icon
+                class="me-2"
+                size="small"
+                @click="openToggleCompletedDialog(item)">
+                {{ item.is_completed ? 'mdi-close' : 'mdi-check' }}
+            </v-icon>
             <v-icon size="small" @click="deleteItem(item)">mdi-delete</v-icon>
         </template>
         <template v-slot:no-data>
@@ -139,6 +170,11 @@ import useForm from '@/composables/useForm.js';
 const dialog = ref(false)
 const dialogDelete = ref(false)
 const dialogCompleted = ref(false)
+const dialogCompletedText = computed(() =>
+    editedItem.value?.is_completed
+        ? 'Are you sure you want to set this task to incomplete?'
+        : 'Are you sure you want to set this task to complete?'
+);
 const toast = useToast()
 const { formErrors, resetErrors, handleApiError } = useForm();
 
@@ -198,7 +234,7 @@ const editItem = (item) => {
     dialog.value = true
 }
 
-const setCompletedItem = (item) => {
+const openToggleCompletedDialog = (item) => {
     editedIndex.value = taskStore.tasks.indexOf(item)
     Object.assign(editedItem, item)
     dialogCompleted.value = true
@@ -221,16 +257,21 @@ const deleteItemConfirm = async () => {
     }
 }
 
-const setCompletedConfirm = async () => {
+const toggleCompletedConfirm = async () => {
     try {
-        await taskStore.setCompletedItem(editedItem.id)
+        const newState = !editedItem.is_completed;
+        await taskStore.toggleCompletedItem(editedItem.id)
         closeCompleted();
-        toast.success('You are successfully set the item to completed!');
+
+        toast.success(
+            newState
+                ? 'You successfully marked the task as completed!'
+                : 'You successfully marked the task as incomplete!'
+        );
+    } catch (error) {
+        toast.error(error.response.data.message);
     }
-    catch(error) {
-        toast.success(error.response.data.message);
-    }
-}
+};
 
 const close = async () => {
     dialog.value = false
@@ -306,5 +347,37 @@ const bulkCompleted = async () => {
         toast.error(error)
     }
 }
+
+const estimatedHours = computed({
+    get: () => Math.floor((editedItem.estimated_time || 0) / 3600),
+    set: (value) => {
+        const minutes = estimatedMinutes.value;
+        editedItem.estimated_time = value * 3600 + minutes * 60;
+    },
+});
+
+const estimatedMinutes = computed({
+    get: () => Math.floor(((editedItem.estimated_time || 0) % 3600) / 60),
+    set: (value) => {
+        const hours = estimatedHours.value;
+        editedItem.estimated_time = hours * 3600 + value * 60;
+    },
+});
+
+const usedHours = computed({
+    get: () => Math.floor((editedItem.used_time || 0) / 3600),
+    set: (value) => {
+        const minutes = usedMinutes.value;
+        editedItem.used_time = value * 3600 + minutes * 60;
+    },
+});
+
+const usedMinutes = computed({
+    get: () => Math.floor(((editedItem.used_time || 0) % 3600) / 60),
+    set: (value) => {
+        const hours = usedHours.value;
+        editedItem.used_time = hours * 3600 + value * 60;
+    },
+});
 
 </script>

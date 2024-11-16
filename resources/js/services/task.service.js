@@ -27,10 +27,10 @@ class TaskService {
             });
     }
 
-    setCompletedItem(id) {
-        return publicApi.put(`/tasks/set-completed/${id}`).then((response) => response.data.data)
+    toggleCompletedItem(id) {
+        return publicApi.put(`/tasks/toggle-completed/${id}`).then((response) => response.data.data)
             .catch((error) => {
-                console.error("Failed when set the data to complete:", error);
+                console.error("Failed when toggle the data to complete:", error);
                 throw error;
             });
     }

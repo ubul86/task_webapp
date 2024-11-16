@@ -84,11 +84,15 @@ class TaskRepository implements TaskRepositoryInterface
         }
     }
 
-    public function setCompleted(int $id): Task
+    public function toggleCompleted(int $id): Task
     {
         try {
             $task = Task::findOrFail($id);
-            return $task->setCompleted();
+            if ($task->isCompleted()) {
+                return $task->setUnCompleted();
+            } else {
+                return $task->setCompleted();
+            }
         } catch (ModelNotFoundException $e) {
             throw new ModelNotFoundException('Task not found: ' . $e->getMessage());
         } catch (Exception $e) {
@@ -96,11 +100,12 @@ class TaskRepository implements TaskRepositoryInterface
         }
     }
 
-    public function setBulkCompleted(array $ids): bool
+    public function setBulkCompleted(array $ids): string
     {
+        $now = Carbon::now();
         try {
-            Task::whereIn('id', $ids)->update(['completed_at' => Carbon::now()]);
-            return true;
+            Task::whereIn('id', $ids)->update(['completed_at' => $now]);
+            return $now;
         } catch (Exception $e) {
             throw new Exception('Failed to set completed tasks: ' . $e->getMessage());
         }

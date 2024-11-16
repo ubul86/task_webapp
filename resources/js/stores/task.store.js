@@ -17,7 +17,7 @@ export const useTaskStore = defineStore('task', {
         async store(item) {
             try {
                 const storedItem = await taskService.store(item);
-                this.tasks.push(...storedItem);
+                this.tasks.push(storedItem);
             } catch (error) {
                 console.error('Error when store the item:', error);
                 throw error;
@@ -33,9 +33,13 @@ export const useTaskStore = defineStore('task', {
             }
         },
 
-        async setCompletedItem(id) {
+        async toggleCompletedItem(id) {
             try {
-                await taskService.setCompletedItem(id);
+                const updatedTask = await taskService.toggleCompletedItem(id);
+                const taskIndex = this.tasks.findIndex(task => task.id === id);
+                if (taskIndex !== -1) {
+                    this.tasks[taskIndex] = updatedTask;
+                }
             } catch (error) {
                 console.error('Error when set the item to confirmed:', error);
                 throw error;
@@ -45,6 +49,7 @@ export const useTaskStore = defineStore('task', {
         async deleteItem(id) {
             try {
                 await taskService.deleteItem(id);
+                this.tasks = this.tasks.filter(task => task.id !== id);
             } catch (error) {
                 console.error('Error in deleting tasks:', error);
                 throw error;
@@ -54,6 +59,7 @@ export const useTaskStore = defineStore('task', {
         async bulkDelete(ids) {
             try {
                 await taskService.bulkDelete(ids);
+                this.tasks = this.tasks.filter(task => !ids.includes(task.id));
             }
             catch (error) {
                 console.error('Error in deleting tasks:', error);
@@ -63,7 +69,13 @@ export const useTaskStore = defineStore('task', {
 
         async bulkCompleted(ids) {
             try {
-                await taskService.bulkCompleted(ids);
+                const completedAt = await taskService.bulkCompleted(ids);
+                this.tasks = this.tasks.map(task => {
+                    if (ids.includes(task.id)) {
+                        return { ...task, completed_at: completedAt, is_completed: true };
+                    }
+                    return task;
+                });
             }
             catch (error) {
                 console.error('Error in confirmed tasks:', error);
