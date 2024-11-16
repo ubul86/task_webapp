@@ -141,6 +141,17 @@
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
+                <v-dialog v-model="dialogBulk" max-width="500px">
+                    <v-card>
+                        <v-card-title class="text-h5">{{ dialogBulkText }}</v-card-title>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="blue-darken-1" variant="text" @click="closeDialogBulk">Cancel</v-btn>
+                            <v-btn color="blue-darken-1" variant="text" @click="saveDialogBulk">OK</v-btn>
+                            <v-spacer></v-spacer>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
                 <v-dialog v-model="dialogCompleted" max-width="500px">
                     <v-card>
                         <v-card-title class="text-h5">
@@ -217,6 +228,12 @@ const dialogCompletedText = computed(() =>
     editedItem.value?.is_completed
         ? 'Are you sure you want to set this task to incomplete?'
         : 'Are you sure you want to set this task to complete?'
+);
+
+const dialogBulk = ref(false);
+const dialogBulkType = ref("");
+const dialogBulkText = computed(() =>
+    dialogBulkType.value == 'delete' ? 'Are you sure you want to bulk delete the selected items?' : 'Are you sure you want to bulk complete the selected items?'
 );
 
 const dialogIncreasedUsedTime = ref(false);
@@ -354,6 +371,11 @@ const closeCompleted = async () => {
     editedIndex.value = -1
 }
 
+const closeDialogBulk = async () => {
+    dialogBulkType.value = '';
+    dialogBulk.value = false;
+}
+
 const saveIncreasedUsedTime = async () => {
     try {
         await taskStore.increaseUsedTime(editedItem.id, editedItem.used_time)
@@ -396,25 +418,30 @@ const emptySelected = () => {
     selected.value = [];
 }
 
-const bulkDelete = async () => {
+const bulkDelete = () => {
+    dialogBulkType.value = "delete";
+    dialogBulk.value = true;
+};
+
+const bulkCompleted = () => {
+    dialogBulkType.value = "complete";
+    dialogBulk.value = true;
+};
+
+const saveDialogBulk = async () => {
     try {
-        await taskStore.bulkDelete(selected.value);
+        if (dialogBulkType.value === "delete") {
+            await taskStore.bulkDelete(selected.value);
+            toast.success('You are successfully delete all the selected items!');
+        } else if (dialogBulkType.value === "complete") {
+            await taskStore.bulkCompleted(selected.value);
+            toast.success('You are successfully set all the selected items to completed!');
+        }
         emptySelected();
-        toast.success('You are successfully delete all the selected items!');
+        closeDialogBulk();
     }
     catch(error) {
         toast.error(error.response.data.message)
-    }
-}
-
-const bulkCompleted = async () => {
-    try {
-        await taskStore.bulkCompleted(selected.value);
-        emptySelected();
-        toast.success('You are successfully set all the selected items to completed!');
-    }
-    catch(error) {
-        toast.error(error)
     }
 }
 
