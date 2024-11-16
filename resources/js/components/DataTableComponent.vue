@@ -52,7 +52,7 @@
                 </v-dialog>
                 <v-dialog v-model="dialog" max-width="500px">
                     <template v-slot:activator="{ props }">
-                        <v-btn class="mb-2" color="primary" dark v-bind="props">New Task</v-btn>
+                        <v-btn color="primary" dark v-bind="props">New Task</v-btn>
                     </template>
                     <v-card>
                         <v-card-title>
@@ -189,16 +189,18 @@
             </v-icon>
         </template>
         <template v-slot:[`item.used_time`]="{ item, value }">
-            <v-chip :color="getUsedTimeColor(item)">
-                {{ formatTime(value) }}
-            </v-chip>
-            <v-btn
-                color="primary"
-                size="x-small"
-                class="justify-center align-center flex mt-2"
-                v-if="!item.is_completed"
-                @click="openUsedTimeDialog(item)"
-            >Add Time</v-btn>
+            <div class="d-flex flex-column align-center mt-2 mb-2">
+                <v-chip :color="getUsedTimeColor(item)">
+                    {{ formatTime(value) }}
+                </v-chip>
+                <v-btn
+                    color="primary"
+                    size="x-small"
+                    class="justify-center align-center flex mt-2 mb-2"
+                    v-if="!item.is_completed"
+                    @click="openUsedTimeDialog(item)"
+                >Add Time</v-btn>
+            </div>
         </template>
         <template v-slot:[`item.estimated_time`]="{ value }">
             {{ formatTime(value) }}
@@ -232,8 +234,9 @@ const dialogCompletedText = computed(() =>
 
 const dialogBulk = ref(false);
 const dialogBulkType = ref("");
+
 const dialogBulkText = computed(() =>
-    dialogBulkType.value == 'delete' ? 'Are you sure you want to bulk delete the selected items?' : 'Are you sure you want to bulk complete the selected items?'
+    dialogBulkType.value == 'delete' ? 'Are you sure you want to delete all the selected items?' : 'Are you sure you want to mark all the selected items as completed?'
 );
 
 const dialogIncreasedUsedTime = ref(false);
@@ -276,9 +279,12 @@ const defaultItem = {
     used_time: null,
 }
 
-const formTitle = computed(() =>
-    editedIndex.value === -1 ? 'New Task' : 'Edit Task'
-)
+const formTitle = computed(() => {
+    if (dialogIncreasedUsedTime.value) {
+        return 'Increase Used Time';
+    }
+    return editedIndex.value === -1 ? 'New Task' : 'Edit Task';
+})
 
 const props = defineProps({
     users: {
@@ -320,7 +326,7 @@ const deleteItemConfirm = async () => {
     try {
         await taskStore.deleteItem(editedItem.id);
         closeDelete()
-        toast.success('You are successfully deleted the item!');
+        toast.success('You have successfully deleted the item!');
     }
     catch(error) {
         toast.success(error.response.data.message);
@@ -391,10 +397,10 @@ const save = async () => {
     try {
         if (editedIndex.value > -1) {
             await taskStore.update(editedIndex.value, editedItem);
-            toast.success('You are successfully edited the item!');
+            toast.success('You have successfully edited the item!');
         } else {
             await taskStore.store(editedItem)
-            toast.success('You are successfully created a new item!');
+            toast.success('You have successfully created a new item!');
         }
         close()
     }
@@ -432,10 +438,10 @@ const saveDialogBulk = async () => {
     try {
         if (dialogBulkType.value === "delete") {
             await taskStore.bulkDelete(selected.value);
-            toast.success('You are successfully delete all the selected items!');
+            toast.success('You have successfully deleted all the selected items!');
         } else if (dialogBulkType.value === "complete") {
             await taskStore.bulkCompleted(selected.value);
-            toast.success('You are successfully set all the selected items to completed!');
+            toast.success('You have successfully set all the selected items to completed!');
         }
         emptySelected();
         closeDialogBulk();
