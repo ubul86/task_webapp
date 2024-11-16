@@ -104,7 +104,9 @@ class TaskRepository implements TaskRepositoryInterface
     {
         $now = Carbon::now();
         try {
-            Task::whereIn('id', $ids)->update(['completed_at' => $now]);
+            Task::whereIn('id', $ids)
+                ->whereNull('completed_at')
+                ->update(['completed_at' => $now]);
             return $now;
         } catch (Exception $e) {
             throw new Exception('Failed to set completed tasks: ' . $e->getMessage());
