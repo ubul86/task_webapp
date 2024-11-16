@@ -52,6 +52,25 @@ services:
         networks:
             - app-network
 
+    mysql_test:
+        image: mysql:8.0
+        container_name: task_mysql_test
+        environment:
+            MYSQL_ROOT_PASSWORD: test_root
+            MYSQL_DATABASE: test_database
+            MYSQL_USER: test_user
+            MYSQL_PASSWORD: test_password
+            TZ: Europe/Budapest
+            LANG: C.UTF_8
+            MYSQL_CHARSET: utf8mb4
+            MYSQL_COLLATION: utf8mb4_unicode_ci
+        ports:
+            - "33065:3306"
+        volumes:
+            - ./docker_settings/mysql_test_data:/var/lib/mysql
+        networks:
+            - app-network
+
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
         restart: unless-stopped
