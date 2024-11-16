@@ -38,22 +38,23 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function update(int $id, array $data): Task
     {
-
-        $collectedData = collect($data);
-
         try {
             $task = Task::findOrFail($id);
-
-            if ($collectedData->has('used_time')) {
-                $task->used_time += $collectedData->get('used_time');
-
-                $collectedData->forget('used_time');
-            }
-
-            $task->fill($collectedData->toArray());
-
-            $task->save();
+            $task->update($data);
             return $task;
+        } catch (ModelNotFoundException $e) {
+            throw new Exception('Task not found: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to update task: ' . $e->getMessage());
+        }
+    }
+
+    public function addUsedTimeToTask(int $id, int $time): Task
+    {
+        try {
+            return tap(Task::findOrFail($id), function ($task) use ($time) {
+                $task->increment('used_time', $time);
+            });
         } catch (ModelNotFoundException $e) {
             throw new Exception('Task not found: ' . $e->getMessage());
         } catch (Exception $e) {

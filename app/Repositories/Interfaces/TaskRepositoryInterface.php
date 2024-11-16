@@ -16,4 +16,5 @@ interface TaskRepositoryInterface
     public function bulkDestroy(array $ids): bool;
     public function setCompleted(int $id): Task;
     public function setBulkCompleted(array $ids): bool;
+    public function addUsedTimeToTask(int $id, int $time): Task;
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddUsedTimeRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Repositories\TaskRepository;
@@ -53,6 +54,19 @@ class TaskController extends Controller
         try {
             $validated = $request->validated();
             $task = $this->taskRepository->update($id, $validated);
+            return response()->json(new TaskResource($task));
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['errors' => $e->getMessage()], 404);
+        } catch (Exception $e) {
+            return response()->json(['errors' => $e->getMessage()], 400);
+        }
+    }
+
+    public function addUsedTimeToTask(AddUsedTimeRequest $request, int $id): JsonResponse
+    {
+        try {
+            $validated = collect($request->validated());
+            $task = $this->taskRepository->addUsedTimeToTask($id, $validated->get('used_time'));
             return response()->json(new TaskResource($task));
         } catch (ModelNotFoundException $e) {
             return response()->json(['errors' => $e->getMessage()], 404);

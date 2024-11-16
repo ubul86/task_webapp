@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 
 Route::put('/tasks/set-completed/{id}', [TaskController::class, 'setCompleted']);
 Route::put('/tasks/set-bulk-completed', [TaskController::class, 'setBulkCompleted']);
+Route::put('/tasks/add-used-time-to-task', [TaskController::class, 'addUsedTimeToTask']);
 Route::delete('/tasks/bulk-destroy', [TaskController::class, 'bulkDestroy']);
 
 Route::apiResource('tasks', TaskController::class);
