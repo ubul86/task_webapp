@@ -146,8 +146,22 @@
             <v-toolbar flat>
                 <v-toolbar-title>Tasks</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
-                <v-spacer></v-spacer>
+                <v-checkbox
+                    v-model="filterIsCompleted"
+                    color="green"
+                    label="Complete Tasks"
+                    :value="true"
+                    hide-details
+                ></v-checkbox>
 
+                <v-checkbox
+                    v-model="filterIsCompleted"
+                    color="red"
+                    label="Incomplete Tasks"
+                    :value="false"
+                    hide-details
+                ></v-checkbox>
+                <v-spacer></v-spacer>
                 <v-text-field
                     v-model="search"
                     density="compact"
@@ -324,6 +338,8 @@ const nameSearch = ref(null);
 const sortBy = ref(null);
 const sortDesc = ref(false);
 
+const filterIsCompleted = ref([true, false]);
+
 const toggleSort = (key) => {
     if (sortBy.value === key) {
         sortDesc.value = !sortDesc.value;
@@ -338,6 +354,10 @@ const filteredItems = computed(() => {
 
     if (nameSearch.value) {
         filtered = filtered.filter((task) => task.user_id === nameSearch.value);
+    }
+
+    if (filterIsCompleted.value.length > 0) {
+        filtered = filtered.filter((task) => filterIsCompleted.value.includes(task.is_completed));
     }
 
     return filtered;
