@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="6">
-            <v-card class="time-card">
+            <v-card class="bg-grey-lighten-4 pt-5 pb-5 pl-5 pr-5">
                 <v-card-title>Estimated time of selected items</v-card-title>
                 <v-card-text>
                     <p>{{ totalTimes.estimated }}</p>
@@ -10,7 +10,7 @@
         </v-col>
 
         <v-col cols="6">
-            <v-card class="time-card">
+            <v-card class="bg-grey-lighten-4 pt-5 pb-5 pl-5 pr-5">
                 <v-card-title>Used time of selected items</v-card-title>
                 <v-card-text>
                     <p>{{ totalTimes.used }}</p>
@@ -41,11 +41,3 @@ const totalTimes = computed(() => {
     };
 });
 </script>
-<style scoped>
-.time-card {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-    padding: 16px;
-}
-</style>

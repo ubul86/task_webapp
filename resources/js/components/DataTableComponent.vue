@@ -1,5 +1,25 @@
 <template>
 
+    <v-row class="mt-5 mb-5">
+        <v-col>
+            <v-card class="bg-grey-lighten-4 pt-2 pb-2 pl-2 pr-2">
+                <v-card-title class="pl-6">Show / Hide Headers:</v-card-title>
+                <v-card-text >
+                    <div class="d-flex flex-wrap">
+                        <v-checkbox
+                            v-for="header in headers"
+                            v-model="toggleHeaders"
+                            :key="header.key"
+                            :label="header.title"
+                            :value="header.key"
+                            :hide-details="true"
+                        ></v-checkbox>
+                    </div>
+                </v-card-text>
+            </v-card>
+        </v-col>
+    </v-row>
+
     <SelectedItemsCountedTimesComponent :items="selectedItems" v-if="selectedItems.length" class="mb-5" />
 
     <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
@@ -135,7 +155,7 @@
 
     <v-data-table
         v-model="selected"
-        :headers="headers"
+        :headers="computedHeaders"
         show-select
         :items="sortedAndFilteredItems"
         v-model:search="search"
@@ -339,6 +359,12 @@ const sortBy = ref(null);
 const sortDesc = ref(false);
 
 const filterIsCompleted = ref([true, false]);
+
+const toggleHeaders = ref(['id','user_name', 'description', 'estimated_time', 'used_time', 'is_completed', 'created_at', 'updated_at', 'actions']);
+
+const computedHeaders = computed(() => {
+    return headers.filter(header => toggleHeaders.value.includes(header.key));
+})
 
 const toggleSort = (key) => {
     if (sortBy.value === key) {
