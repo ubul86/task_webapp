@@ -138,7 +138,20 @@ docker exec -it {php_fpm_container_name} bash
 php artisan migrate:fresh --seed
 ```
 
-### 8. Build or Watch the frontend
+### 8. Install Npm Packages
+
+
+```bash
+docker exec -it {node_container_name} npm install
+```
+
+or
+
+```bash
+docker exec -it {node_container_name} npm install
+```
+
+### 9. Build or Watch the frontend
 
 ```bash
 docker exec -it {node_container_name} npm run build
@@ -150,7 +163,7 @@ or
 docker exec -it {node_container_name} npm run watch
 ```
 
-### 9. Change User and Group in php container
+### 10. Change User and Group in php container
 
 It is necessary to change the user and group inside the PHP container. This is currently an issue using the application with Docker, unfortunately.
 
@@ -230,7 +243,13 @@ php artisan serve
 
 The application should now be accessible at http://localhost:8000.
 
-### 9. Build or Watch the Frontend With Vite
+### 9. Install Npm Packages
+
+```bash
+npm install
+```
+
+### 10. Build or Watch the Frontend With Vite
 
 ```bash
 npm run build
@@ -330,5 +349,11 @@ https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-c
 ### Windows
 - Docker automatically installs Docker Compose.
 
+## Example Images
 
+![Task App Overview](documentations/task_example_image_1.png )
+![New Task](documentations/task_example_image_2.png )
+![Filtering Tasks with Completion And Show Estimated and Used Times](documentations/task_example_image_3.png )
+![Increase Used Time of Selected Task](documentations/task_example_image_4.png )
+![Filtering Tasks by User](documentations/task_example_image_5.png )
 
