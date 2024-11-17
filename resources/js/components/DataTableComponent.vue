@@ -2,6 +2,137 @@
 
     <SelectedItemsCountedTimesComponent :items="selectedItems" v-if="selectedItems.length" class="mb-5" />
 
+    <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
+        <v-card>
+            <v-card-title>
+                <span class="text-h5">{{ formTitle }}</span>
+            </v-card-title>
+            <v-card-text>
+                <v-container>
+                    <v-row>
+                        <v-col cols="12">
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-text-field
+                                        v-model.number="usedHours"
+                                        label="Used Hours"
+                                        type="number"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="6">
+                                    <v-text-field
+                                        v-model.number="usedMinutes"
+                                        label="Used Minutes"
+                                        type="number"
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-darken-1" variant="text" @click="closeIncreasedUsedTime">Cancel</v-btn>
+                <v-btn color="blue-darken-1" variant="text" @click="saveIncreasedUsedTime">Save</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialog" max-width="500px">
+        <v-card>
+            <v-card-title>
+                <span class="text-h5">{{ formTitle }}</span>
+            </v-card-title>
+            <v-card-text>
+                <v-container>
+                    <v-row>
+                        <v-col cols="12" >
+                            <v-text-field
+                                v-model="editedItem.description"
+                                label="Description"
+                                :error="!!formErrors.description"
+                                :error-messages="formErrors.description || []"
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" >
+                            <v-select
+                                v-model="editedItem.user_id"
+                                :items="props.users"
+                                item-value="id"
+                                item-title="name"
+                                label="Users"
+                                :error="!!formErrors.user_id"
+                                :error-messages="formErrors.user_id || []"
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-text-field
+                                        v-model.number="estimatedHours"
+                                        label="Estimated Hours"
+                                        type="number"
+                                        hide-details
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="6">
+                                    <v-text-field
+                                        v-model.number="estimatedMinutes"
+                                        label="Estimated Minutes"
+                                        type="number"
+                                        hide-details
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="12" v-if="formErrors.estimated_time">
+                                    <span class="text-red">{{ formErrors.estimated_time[0] }}</span>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+
+                        <v-col cols="12">
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-text-field
+                                        v-model.number="usedHours"
+                                        label="Used Hours"
+                                        type="number"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="6">
+                                    <v-text-field
+                                        v-model.number="usedMinutes"
+                                        label="Used Minutes"
+                                        type="number"
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
+                <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+
+    <v-dialog v-model="dialogBulk" max-width="500px">
+        <v-card>
+            <v-card-title class="text-h5">{{ dialogBulkText }}</v-card-title>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue-darken-1" variant="text" @click="closeDialogBulk">Cancel</v-btn>
+                <v-btn color="blue-darken-1" variant="text" @click="saveDialogBulk">OK</v-btn>
+                <v-spacer></v-spacer>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+
     <v-data-table
         v-model="selected"
         :headers="headers"
@@ -16,6 +147,7 @@
                 <v-toolbar-title>Tasks</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
+
                 <v-text-field
                     v-model="search"
                     density="compact"
@@ -26,159 +158,9 @@
                     hide-details
                     single-line
                 ></v-text-field>
-                <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
-                    <v-card>
-                        <v-card-title>
-                            <span class="text-h5">{{ formTitle }}</span>
-                        </v-card-title>
-                        <v-card-text>
-                            <v-container>
-                                <v-row>
-                                    <v-col cols="12">
-                                        <v-row>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    v-model.number="usedHours"
-                                                    label="Used Hours"
-                                                    type="number"
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    v-model.number="usedMinutes"
-                                                    label="Used Minutes"
-                                                    type="number"
-                                                ></v-text-field>
-                                            </v-col>
-                                        </v-row>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                        </v-card-text>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="closeIncreasedUsedTime">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="saveIncreasedUsedTime">Save</v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialog" max-width="500px">
-                    <template v-slot:activator="{ props }">
-                        <v-btn color="primary" dark v-bind="props">New Task</v-btn>
-                    </template>
-                    <v-card>
-                        <v-card-title>
-                            <span class="text-h5">{{ formTitle }}</span>
-                        </v-card-title>
-                        <v-card-text>
-                            <v-container>
-                                <v-row>
-                                    <v-col cols="12" >
-                                        <v-text-field
-                                            v-model="editedItem.description"
-                                            label="Description"
-                                            :error="!!formErrors.description"
-                                            :error-messages="formErrors.description || []"
-                                        ></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" >
-                                        <v-select
-                                            v-model="editedItem.user_id"
-                                            :items="props.users"
-                                            item-value="id"
-                                            item-title="name"
-                                            label="Users"
-                                            :error="!!formErrors.user_id"
-                                            :error-messages="formErrors.user_id || []"
-                                        ></v-select>
-                                    </v-col>
-                                    <v-col cols="12">
-                                        <v-row>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    v-model.number="estimatedHours"
-                                                    label="Estimated Hours"
-                                                    type="number"
-                                                    hide-details
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    v-model.number="estimatedMinutes"
-                                                    label="Estimated Minutes"
-                                                    type="number"
-                                                    hide-details
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12">
-                                                <span class="text-red">{{ formErrors.estimated_time[0] }}</span>
-                                            </v-col>
-                                        </v-row>
-                                    </v-col>
 
-                                    <v-col cols="12">
-                                        <v-row>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    v-model.number="usedHours"
-                                                    label="Used Hours"
-                                                    type="number"
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    v-model.number="usedMinutes"
-                                                    label="Used Minutes"
-                                                    type="number"
-                                                ></v-text-field>
-                                            </v-col>
-                                        </v-row>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                        </v-card-text>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialogDelete" max-width="500px">
-                    <v-card>
-                        <v-card-title class="text-h5">Are you sure you want to delete this task?</v-card-title>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                            <v-spacer></v-spacer>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialogBulk" max-width="500px">
-                    <v-card>
-                        <v-card-title class="text-h5">{{ dialogBulkText }}</v-card-title>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="closeDialogBulk">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="saveDialogBulk">OK</v-btn>
-                            <v-spacer></v-spacer>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialogCompleted" max-width="500px">
-                    <v-card>
-                        <v-card-title class="text-h5">
-                            {{ dialogCompletedText }}
-                        </v-card-title>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="closeCompleted">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="toggleCompletedConfirm">OK</v-btn>
-                            <v-spacer></v-spacer>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
+                <v-btn color="primary" dark v-bind="props" @click="openDialog">New Task</v-btn>
+
             </v-toolbar>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
@@ -189,7 +171,7 @@
                 @click="openToggleCompletedDialog(item)">
                 {{ item.is_completed ? 'mdi-close' : 'mdi-check' }}
             </v-icon>
-            <v-icon size="small" @click="deleteItem(item)">mdi-delete</v-icon>
+            <v-icon size="small" @click="dialogDelete(item, index)">mdi-delete</v-icon>
         </template>
         <template v-slot:no-data>
             <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -243,13 +225,30 @@
             </div>
         </template>
     </v-data-table>
+
     <v-row v-if="selected.length">
         <v-col>
             <v-btn @click="bulkDelete">Bulk delete</v-btn>
             <v-btn @click="bulkCompleted">Bulk confirmed</v-btn>
         </v-col>
     </v-row>
+
     <SelectedItemsCountedTimesComponent :items="selectedItems" v-if="selectedItems.length" class="mt-5" />
+
+    <DialogDeleteComponent
+        :is-dialog-delete-open="isDialogDeleteOpen"
+        @update:isDialogDeleteOpen="isDialogDeleteOpen = $event"
+        :item-id="editedItem?.id"
+        @closeDelete="closeDelete"
+    />
+
+    <DialogCompletedComponent :is-dialog-completed-open="isDialogCompletedOpen"
+                              @update:isDialogCompletedOpen="isDialogCompletedOpen = $event"
+                              :item-id="editedItem?.id"
+                              :isCompleted="editedItem?.is_completed"
+                              @closeCompleted="closeCompleted"
+                              />
+
 </template>
 
 <script setup>
@@ -259,15 +258,10 @@ import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCounte
 import { useToast } from 'vue-toastification';
 import { formatTime } from '@/utils/formatTime';
 import useForm from '@/composables/useForm.js';
+import DialogDeleteComponent from '@/components/dialogs/DialogDeleteComponent.vue'
+import DialogCompletedComponent from '@/components/dialogs/DialogCompletedComponent.vue'
 
 const dialog = ref(false)
-const dialogDelete = ref(false)
-const dialogCompleted = ref(false)
-const dialogCompletedText = computed(() =>
-    editedItem.value?.is_completed
-        ? 'Are you sure you want to set this task to incomplete?'
-        : 'Are you sure you want to set this task to complete?'
-);
 
 const dialogBulk = ref(false);
 const dialogBulkType = ref("");
@@ -380,10 +374,8 @@ const editItem = (item) => {
     dialog.value = true
 }
 
-const openToggleCompletedDialog = (item) => {
-    editedIndex.value = taskStore.tasks.indexOf(item)
-    Object.assign(editedItem, item)
-    dialogCompleted.value = true
+const openDialog = () => {
+    dialog.value = true;
 }
 
 const openUsedTimeDialog = (item) => {
@@ -392,39 +384,6 @@ const openUsedTimeDialog = (item) => {
     editedItem.used_time = 0;
     dialogIncreasedUsedTime.value = true;
 }
-
-const deleteItem = (item) => {
-    editedIndex.value = taskStore.tasks.indexOf(item)
-    Object.assign(editedItem, item)
-    dialogDelete.value = true
-}
-
-const deleteItemConfirm = async () => {
-    try {
-        await taskStore.deleteItem(editedItem.id);
-        closeDelete()
-        toast.success('You have successfully deleted the item!');
-    }
-    catch(error) {
-        toast.success(error.response.data.message);
-    }
-}
-
-const toggleCompletedConfirm = async () => {
-    try {
-        const newState = !editedItem.is_completed;
-        await taskStore.toggleCompletedItem(editedItem.id)
-        closeCompleted();
-
-        toast.success(
-            newState
-                ? 'You successfully marked the task as completed!'
-                : 'You successfully marked the task as incomplete!'
-        );
-    } catch (error) {
-        toast.error(error.response.data.message);
-    }
-};
 
 const close = async () => {
     dialog.value = false
@@ -440,19 +399,6 @@ const closeIncreasedUsedTime = async () => {
     editedIndex.value = -1
 }
 
-const closeDelete = async () => {
-    dialogDelete.value = false
-    await nextTick()
-    Object.assign(editedItem, defaultItem)
-    editedIndex.value = -1
-}
-
-const closeCompleted = async () => {
-    dialogCompleted.value = false
-    await nextTick()
-    Object.assign(editedItem, defaultItem)
-    editedIndex.value = -1
-}
 
 const closeDialogBulk = async () => {
     dialogBulkType.value = '';
@@ -559,6 +505,37 @@ const usedMinutes = computed({
         editedItem.used_time = hours * 3600 + value * 60;
     },
 });
+
+const isDialogDeleteOpen = ref(false);
+
+const dialogDelete = (item) => {
+    isDialogDeleteOpen.value = true;
+    editedIndex.value = taskStore.tasks.indexOf(item)
+    Object.assign(editedItem, item)
+};
+
+const closeDelete = async() => {
+    isDialogDeleteOpen.value = false;
+    await nextTick();
+    Object.assign(editedItem, defaultItem)
+    editedIndex.value = -1
+};
+
+
+const isDialogCompletedOpen = ref(false);
+
+const openToggleCompletedDialog = (item) => {
+    isDialogCompletedOpen.value = true;
+    editedIndex.value = taskStore.tasks.indexOf(item)
+    Object.assign(editedItem, item)
+}
+
+const closeCompleted = async () => {
+    isDialogCompletedOpen.value = false
+    await nextTick()
+    Object.assign(editedItem, defaultItem)
+    editedIndex.value = -1
+}
 
 </script>
 
