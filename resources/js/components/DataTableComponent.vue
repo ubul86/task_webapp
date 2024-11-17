@@ -6,7 +6,9 @@
         v-model="selected"
         :headers="headers"
         show-select
-        :items="taskStore.tasks"
+        :items="sortedAndFilteredItems"
+        v-model:search="search"
+        :filter-keys="['description', 'user_name']"
 
     >
         <template v-slot:top>
@@ -14,6 +16,16 @@
                 <v-toolbar-title>Tasks</v-toolbar-title>
                 <v-divider class="mx-4" inset vertical></v-divider>
                 <v-spacer></v-spacer>
+                <v-text-field
+                    v-model="search"
+                    density="compact"
+                    label="Search"
+                    prepend-inner-icon="mdi-magnify"
+                    variant="solo-filled"
+                    flat
+                    hide-details
+                    single-line
+                ></v-text-field>
                 <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
                     <v-card>
                         <v-card-title>
@@ -87,6 +99,7 @@
                                                     v-model.number="estimatedHours"
                                                     label="Estimated Hours"
                                                     type="number"
+                                                    hide-details
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="6">
@@ -94,6 +107,7 @@
                                                     v-model.number="estimatedMinutes"
                                                     label="Estimated Minutes"
                                                     type="number"
+                                                    hide-details
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="12">
@@ -205,6 +219,29 @@
         <template v-slot:[`item.estimated_time`]="{ value }">
             {{ formatTime(value) }}
         </template>
+        <template v-slot:[`header.user_name`]="{}">
+            <div class="d-flex justify-center align-center">
+                <div style="flex: 4">
+                    <v-autocomplete
+                        v-model="nameSearch"
+                        :items="props.users"
+                        item-value="id"
+                        item-title="name"
+                        label="Users"
+                        type="text"
+                        hide-details
+                        clearable
+                    ></v-autocomplete>
+                </div>
+                <div style="flex: 1">
+                    <v-icon
+                        @click="toggleSort('user_name')"
+                    >
+                        mdi-sort
+                    </v-icon>
+                </div>
+            </div>
+        </template>
     </v-data-table>
     <v-row v-if="selected.length">
         <v-col>
@@ -252,7 +289,7 @@ const headers = [
         align: 'start',
         key: 'id',
     },
-    { title: 'User', key: 'user_name' },
+    { title: 'User', key: 'user_name', sortable: false },
     { title: 'Description', key: 'description' },
     { title: 'Estimated Time', key: 'estimated_time' },
     { title: 'Used Time', key: 'used_time' },
@@ -285,6 +322,46 @@ const formTitle = computed(() => {
     }
     return editedIndex.value === -1 ? 'New Task' : 'Edit Task';
 })
+
+const search = ref('');
+
+const nameSearch = ref(null);
+
+const sortBy = ref(null);
+const sortDesc = ref(false);
+
+const toggleSort = (key) => {
+    if (sortBy.value === key) {
+        sortDesc.value = !sortDesc.value;
+    } else {
+        sortBy.value = key;
+        sortDesc.value = false;
+    }
+};
+
+const filteredItems = computed(() => {
+    let filtered = taskStore.tasks;
+
+    if (nameSearch.value) {
+        filtered = filtered.filter((task) => task.user_id === nameSearch.value);
+    }
+
+    return filtered;
+});
+
+const sortedAndFilteredItems = computed(() => {
+    const filtered = filteredItems.value;
+    if (!sortBy.value) return filtered;
+
+    return [...filtered].sort((a, b) => {
+        const aValue = a[sortBy.value];
+        const bValue = b[sortBy.value];
+
+        if (aValue < bValue) return sortDesc.value ? 1 : -1;
+        if (aValue > bValue) return sortDesc.value ? -1 : 1;
+        return 0;
+    });
+});
 
 const props = defineProps({
     users: {
@@ -484,3 +561,15 @@ const usedMinutes = computed({
 });
 
 </script>
+
+<style>
+
+.v-data-table__tr:nth-child(odd) {
+    background-color: #e5e7eb;
+}
+
+.v-data-table__tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+</style>
