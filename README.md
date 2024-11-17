@@ -34,8 +34,6 @@ This project uses Docker to containerize the different components of the applica
 
 - **php**: This service runs the PHP application (Laravel) using PHP 8.1. It is the core backend service that handles HTTP requests, interacts with the database, and manages the application logic. The service shares the application codebase with the host machine to enable hot-reloading during development.
 
-- **redis**: The Redis service is used as an in-memory data store and cache. It is essential for handling queues, caching frequently accessed data, and storing real-time event data.
-
 - **mysql**: This service runs the MySQL database server, which stores the application's data. The database is configured with persistent storage to retain data across container restarts. The database credentials and other environment variables are defined in the `.env` file.
 
 - **phpmyadmin**: A web-based interface for managing MySQL databases. It allows developers to interact with the database, run queries, and manage tables via a user-friendly UI. The service is accessible via a browser on port 80 (or a custom port defined in the `.env` file).
