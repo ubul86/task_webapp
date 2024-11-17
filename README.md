@@ -96,19 +96,7 @@ Go to the project root directory, where is the docker-compose.yml file and add t
 docker-compose up -d --build
 ```
 
-### 5. Generate Application Key
-
-```bash
-docker exec -it {php_fpm_container_name} php artisan key:generate
-```
-
-or
-```bash
-docker exec -it {php_fpm_container_name} bash
-php artisan key:generate
-```
-
-### 6. Install Dependencies:
+### 5. Install Dependencies:
 
 Install PHP dependencies using Composer:
 
@@ -122,37 +110,35 @@ docker exec -it {php_fpm_container_name} bash
 composer install
 ```
 
+### 6. Generate Application Key
+
+```bash
+docker exec -it {php_fpm_container_name} php artisan key:generate
+```
+
+or
+```bash
+docker exec -it {php_fpm_container_name} bash
+php artisan key:generate
+```
+
+
 ### 7. Run Migrations
 
-Run the database migrations:
+Run the database migrations with seed:
 
 ```bash
-docker exec -it {php_fpm_container_name} php artisan migrate
+docker exec -it {php_fpm_container_name} php artisan migrate:fresh --seed
 ```
 
 or
 
 ```bash
 docker exec -it {php_fpm_container_name} bash
-php artisan migrate
+php artisan migrate:fresh --seed
 ```
 
-### 8. Seed the Database
-
-Seed the database with initial data:
-
-```bash
-docker exec -it {php_fpm_container_name} php artisan db:seed
-```
-
-or
-
-```bash
-docker exec -it {php_fpm_container_name} bash
-php artisan db:seed
-```
-
-### 9. Build or Watch the frontend
+### 8. Build or Watch the frontend
 
 ```bash
 docker exec -it {node_container_name} npm run build
@@ -164,6 +150,13 @@ or
 docker exec -it {node_container_name} npm run watch
 ```
 
+### 9. Change User and Group in php container
+
+It is necessary to change the user and group inside the PHP container. This is currently an issue using the application with Docker, unfortunately.
+
+```bash
+docker exec -it {php_container} chown -R www-data:www-data *
+```
 
 ## Installation Without Docker
 
