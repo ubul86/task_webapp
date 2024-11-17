@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TaskRepositoryTest extends TestCase
 {
-
     protected TaskRepository $repository;
 
     protected function setUp(): void
