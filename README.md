@@ -1,9 +1,19 @@
-# Task Example WebApp For CSIHA
+# Task Example WebApp
 
 ## Overview
 
+This is a task management application built with Laravel 10 for the backend and Vue 3 for the frontend, featuring Pinia for state management and Vuetify for UI components.
+
 ## Features
 
+- Task Creation and Modification: Users can create new tasks and modify existing ones.
+- Task Filtering and Sorting: Tasks can be filtered and sorted based on various criteria.
+- Time Tracking:
+  - Each task includes two time fields:
+    - Task Estimation Time: The estimated time to complete the task.
+    - Task Used Time: The time spent working on the task.
+  - Used Time: Users can add used time to existing tasks, and the time is added to the current Used Time field.
+- Task Completion: Tasks can be marked as "completed" and reverted back to "in progress" if needed.
 
 ## Minimum Requirements
 
@@ -12,7 +22,7 @@
 - **Composer**: 2.0 or higher
 - **MySQL**: 5.7 or higher
 - **Laravel**: 10.x
-- **Node.js 16** or higher
+- **Node.js 20** or higher
 
 ## Docker Services
 
@@ -46,19 +56,24 @@ cd task_webapp
  
 ### 2. Copy Environment File
 
-Copy the .env.sample file to .env:
+Copy the .env.example file to .env
 
 ```bash
-cp .env.sample .env
+cp .env.example .env
+```
+
+Copy the .env.testing.example file to .env.testing
+```bash
+cp .env.testing.example .env.testing
 ```
 
 ### 3. Set Environment Variables
-In the .env file, you need to set the DB connections and some Host, Pusher and Queue value.
+In the .env file, you need to set the DB connections and some Host.
 Here is an example configuration:
 
 ```env
 DB_CONNECTION=mysql
-DB_HOST=mysql
+DB_HOST=mysql82
 DB_PORT=3306
 DB_DATABASE=your_database_name
 DB_USERNAME=your_database_username
@@ -71,7 +86,7 @@ VITE_API_URL=/api/
 
 ```
 
-The DB_HOST needs to be mysql container name and the PUSHER_HOST needs to be soketi like in docker-compose.yml service name.
+The DB_HOST needs to be mysql82 service name.
 
 ### 4. Build The Containers
 
@@ -81,7 +96,19 @@ Go to the project root directory, where is the docker-compose.yml file and add t
 docker-compose up -d --build
 ```
 
-### 5. Install Dependencies:
+### 5. Generate Application Key
+
+```bash
+docker exec -it {php_fpm_container_name} php artisan key:generate
+```
+
+or
+```bash
+docker exec -it {php_fpm_container_name} bash
+php artisan key:generate
+```
+
+### 6. Install Dependencies:
 
 Install PHP dependencies using Composer:
 
@@ -157,12 +184,18 @@ Install PHP dependencies using Composer:
 composer install
 ```
 
-### 3. Copy Environment File
+### 3. Copy Environments File
 
-Copy the .env.sample file to .env:
+Copy the .env.example file to .env
 
 ```bash
-cp .env.sample .env
+cp .env.example .env
+```
+
+Copy the .env.testing.example file to .env.testing
+
+```bash
+cp .env.testing.example .env.testing
 ```
 
 ### 5. Configure the Database
@@ -258,7 +291,7 @@ Note: You might need to update your phpstan.neon configuration if you encounter 
 
 ### PHPUnit
 
-Unit tests are written using PHPUnit. To run tests, first configure SQLite in-memory database in phpunit.xml. This setup allows you to run tests without affecting your actual database. The database is created and discarded during each test run, ensuring a clean state.
+Unit tests are written using PHPUnit. To run tests, first configure SQLite in-memory database in phpunit.xml or .env.testing file. This setup allows you to run tests without affecting your actual database. The database is created and discarded during each test run, ensuring a clean state.
 
 - Open phpunit.xml and set up the SQLite in-memory database configuration:
 ```xml
@@ -274,6 +307,13 @@ Unit tests are written using PHPUnit. To run tests, first configure SQLite in-me
 ```bash
 php artisan test
 ```
+
+or
+
+```bash
+docker exec -it {php_fpm_container} php artisan test
+```
+
 
 This will execute all tests in the tests directory and provide a summary of test results.
 
