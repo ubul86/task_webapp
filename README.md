@@ -1,5 +1,7 @@
 # Task Example WebApp
 
+![Task App](documentations/task_app.png)
+
 ## Overview
 
 This is a task management application built with Laravel 10 for the backend and Vue 3 for the frontend, featuring Pinia for state management and Vuetify for UI components.
