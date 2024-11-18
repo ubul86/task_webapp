@@ -160,6 +160,7 @@
         :items="sortedAndFilteredItems"
         v-model:search="search"
         :filter-keys="['description', 'user_name']"
+        :mobile="smAndDown"
 
     >
         <template v-slot:top>
@@ -294,6 +295,9 @@ import { formatTime } from '@/utils/formatTime';
 import useForm from '@/composables/useForm.js';
 import DialogDeleteComponent from '@/components/dialogs/DialogDeleteComponent.vue'
 import DialogCompletedComponent from '@/components/dialogs/DialogCompletedComponent.vue'
+import { useDisplay } from 'vuetify'
+
+const { smAndDown } = useDisplay()
 
 const dialog = ref(false)
 
