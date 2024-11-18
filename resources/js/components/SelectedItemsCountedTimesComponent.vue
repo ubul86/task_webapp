@@ -29,11 +29,28 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    sortedAndFilteredItems: {
+        type: Array,
+        required: true
+    }
 });
 
+const filteredTasks = computed(() => {
+
+    if (!props.items || !props.sortedAndFilteredItems) {
+        return [];
+    }
+
+     return  props.items.filter(item =>
+            props.sortedAndFilteredItems.some(filteredItem => filteredItem.id === item.id)
+        )
+    }
+)
+
+
 const totalTimes = computed(() => {
-    const totalEstimated = props.items.reduce((sum, item) => sum + item.estimated_time, 0);
-    const totalUsed = props.items.reduce((sum, item) => sum + item.used_time, 0);
+    const totalEstimated = filteredTasks.value.reduce((sum, item) => sum + item.estimated_time, 0);
+    const totalUsed = filteredTasks.value.reduce((sum, item) => sum + item.used_time, 0);
 
     return {
         estimated: formatTime(totalEstimated),
