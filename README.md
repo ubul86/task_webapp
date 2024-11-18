@@ -356,4 +356,5 @@ https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-c
 ![Filtering Tasks with Completion And Show Estimated and Used Times](documentations/task_example_image_3.png )
 ![Increase Used Time of Selected Task](documentations/task_example_image_4.png )
 ![Filtering Tasks by User](documentations/task_example_image_5.png )
+![Toggle Visibility of the Database Header Columns](documentations/task_example_image_6.png )
 
