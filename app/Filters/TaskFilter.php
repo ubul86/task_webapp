@@ -27,19 +27,23 @@ class TaskFilter
 
         $this->applySort($query);
 
-        if ($params->has('search')) {
-            $query->where('name', 'like', '%' . $params->get('search') . '%');
+        if ($this->params['search']) {
+            $query->where(function ($q) {
+                $q->where('description', 'like', '%' . $this->params['search'] . '%')
+                    ->orWhereHas('user', function ($subQuery) {
+                        $subQuery->where('name', 'like', '%' . $this->params['search'] . '%');
+                    });
+            });
         }
 
         if ($params->has('is_completed')) {
             $isCompleted = $params->get('is_completed');
 
             if (count($isCompleted) === 1) {
-                if ($isCompleted[0] === 'none') {
-                    $query->whereRaw('1 = 0');
-                } else {
-                    $query->where('is_completed', filter_var($isCompleted[0], FILTER_VALIDATE_BOOLEAN));
-                }
+                $firstElementOfIsCompleted = collect($isCompleted)->first();
+                $firstElementOfIsCompleted === 'none' ?
+                    $query->whereRaw('1 = 0') :
+                    $query->where('is_completed', filter_var($firstElementOfIsCompleted, FILTER_VALIDATE_BOOLEAN));
             }
         }
 
