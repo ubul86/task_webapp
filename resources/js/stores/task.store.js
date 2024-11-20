@@ -3,10 +3,18 @@ import taskService from '@/services/task.service.js';
 export const useTaskStore = defineStore('task', {
     state: () => ({
         tasks: [],
+        meta: {
+            'items_per_page' : 10,
+            'total_items': 0,
+            'total_pages': 0,
+            'current_page': 1
+        }
     }),
     actions: {
-        async fetchTasks() {
-            this.tasks = await taskService.fetchTasks();
+        async fetchTasks(params) {
+            const data = await taskService.fetchTasks(params);
+            this.tasks = data.tasks;
+            this.meta = data.meta;
         },
 
         async store(item) {

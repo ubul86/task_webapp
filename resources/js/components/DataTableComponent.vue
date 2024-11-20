@@ -153,13 +153,17 @@
     </v-dialog>
 
 
-    <v-data-table
+    <v-data-table-server
         v-model="selected"
         :headers="computedHeaders"
         show-select
-        :items="sortedAndFilteredItems"
+        :items="taskStore.tasks"
         v-model:search="search"
         :filter-keys="['description', 'user_name']"
+        @update:options="loadItems"
+        :items-per-page="taskStore.meta.items_per_page"
+        :items-length="taskStore.meta.total_items"
+        :loading="tableLoadingItems"
 
     >
         <template v-slot:top>
@@ -258,7 +262,7 @@
                 </div>
             </div>
         </template>
-    </v-data-table>
+    </v-data-table-server>
 
     <v-row v-if="selected.length">
         <v-col>
@@ -286,7 +290,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, nextTick } from 'vue'
+import { ref, reactive, computed, nextTick, watch } from 'vue'
 import { useTaskStore } from '@/stores/task.store.js';
 import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCountedTimesComponent.vue'
 import { useToast } from 'vue-toastification';
@@ -355,8 +359,8 @@ const search = ref('');
 
 const nameSearch = ref(null);
 
-const sortBy = ref(null);
-const sortDesc = ref(false);
+const userCustomSortBy = ref(null);
+const userCustomSortDesc = ref(false);
 
 const filterIsCompleted = ref([true, false]);
 
@@ -366,42 +370,59 @@ const computedHeaders = computed(() => {
     return headers.filter(header => toggleHeaders.value.includes(header.key));
 })
 
+const tableLoadingItems = ref(true);
+
 const toggleSort = (key) => {
-    if (sortBy.value === key) {
-        sortDesc.value = !sortDesc.value;
+    tableParams.sortBy = [];
+    if (userCustomSortBy.value === key) {
+        userCustomSortDesc.value = !userCustomSortDesc.value;
     } else {
-        sortBy.value = key;
-        sortDesc.value = false;
+        userCustomSortBy.value = key;
+        userCustomSortDesc.value = false;
     }
+    tableParams.sortBy.push({key: userCustomSortBy.value, order: userCustomSortDesc.value ? 'desc' : 'asc'});
+    loadItems();
 };
 
-const filteredItems = computed(() => {
-    let filtered = taskStore.tasks;
+
+const tableParams = reactive({
+    page: 1,
+    itemsPerPage: 10,
+    sortBy: [],
+    search: '',
+    additionalFilters: {},
+});
+
+watch(filterIsCompleted, () => {
+    loadItems();
+});
+
+const loadItems = async (params) => {
+
+    tableLoadingItems.value = true;
+
+    Object.assign(tableParams, params);
+
+    const filters = {};
+
+    filters.is_completed = ['none'];
+
+    if (filterIsCompleted.value.length) {
+        filters.is_completed = filterIsCompleted.value;
+    }
 
     if (nameSearch.value) {
-        filtered = filtered.filter((task) => task.user_id === nameSearch.value);
+        filters.user_name = nameSearch.value;
     }
 
-    if (filterIsCompleted.value.length > 0) {
-        filtered = filtered.filter((task) => filterIsCompleted.value.includes(task.is_completed));
-    }
+    const combinedParams = {
+        ...tableParams,
+        filters
+    };
 
-    return filtered;
-});
-
-const sortedAndFilteredItems = computed(() => {
-    const filtered = filteredItems.value;
-    if (!sortBy.value) return filtered;
-
-    return [...filtered].sort((a, b) => {
-        const aValue = a[sortBy.value];
-        const bValue = b[sortBy.value];
-
-        if (aValue < bValue) return sortDesc.value ? 1 : -1;
-        if (aValue > bValue) return sortDesc.value ? -1 : 1;
-        return 0;
-    });
-});
+    await taskStore.fetchTasks(combinedParams)
+    tableLoadingItems.value = false;
+}
 
 const props = defineProps({
     users: {

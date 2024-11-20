@@ -22,10 +22,18 @@ class TaskController extends Controller
         $this->taskRepository = $taskRepository;
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $tasks = $this->taskRepository->index();
-        return response()->json(TaskResource::collection($tasks));
+        $tasks = $this->taskRepository->index($request->all());
+        return response()->json([
+            'tasks' => TaskResource::collection($tasks->items()),
+            'meta' => [
+                'current_page' => $tasks->currentPage(),
+                'total_pages' => $tasks->lastPage(),
+                'total_items' => $tasks->total(),
+                'items_per_page' => $tasks->perPage(),
+            ],
+        ]);
     }
 
     public function show(int $id): JsonResponse

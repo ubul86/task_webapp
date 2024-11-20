@@ -17,7 +17,7 @@ class Task extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
-    protected $fillable = ['description', 'completed_at', 'used_time', 'estimated_time', 'user_id'];
+    protected $fillable = ['description', 'completed_at', 'used_time', 'estimated_time', 'user_id', 'is_completed'];
 
     /** @return BelongsTo<User, Task> */
     public function user(): BelongsTo
@@ -28,6 +28,7 @@ class Task extends Model
     public function setCompleted(): Task
     {
         $this->completed_at = Carbon::now();
+        $this->is_completed = true;
         $this->save();
 
         return $this;
@@ -36,14 +37,10 @@ class Task extends Model
     public function setUnCompleted(): self
     {
         $this->completed_at = null;
+        $this->is_completed = false;
         $this->save();
 
         return $this;
-    }
-
-    public function isCompleted(): bool
-    {
-        return !is_null($this->completed_at);
     }
 
     public function getCreatedAtAttribute(?string $value): ?string

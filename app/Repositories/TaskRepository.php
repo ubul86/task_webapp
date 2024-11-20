@@ -2,19 +2,31 @@
 
 namespace App\Repositories;
 
+use App\Filters\TaskFilter;
 use App\Repositories\Interfaces\TaskRepositoryInterface;
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TaskRepository implements TaskRepositoryInterface
 {
-    /** @return EloquentCollection<int, Task> */
-    public function index(): EloquentCollection
+    /**
+     * @param array $filters
+     * @return LengthAwarePaginator<Task>
+     */
+    public function index(array $filters = []): LengthAwarePaginator
     {
-        return Task::with('user')->get();
+        $query = Task::with('user');
+
+        $taskFilter = new TaskFilter($filters);
+        $filteredQuery = $taskFilter->apply($query);
+
+        $perPage = $filters['itemsPerPage'] ?? 10;
+        $page = $filters['page'] ?? 1;
+
+        return $filteredQuery->paginate($perPage, ['*'], 'page', $page);
     }
 
     public function show(int $id): Task
@@ -88,7 +100,7 @@ class TaskRepository implements TaskRepositoryInterface
     {
         try {
             $task = Task::findOrFail($id);
-            if ($task->isCompleted()) {
+            if ($task->is_completed) {
                 return $task->setUnCompleted();
             } else {
                 return $task->setCompleted();
