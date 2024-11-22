@@ -142,6 +142,7 @@
         :items="sortedAndFilteredItems"
         v-model:search="search"
         :filter-keys="['description', 'user_name']"
+        :mobile="smAndDown"
 
     >
         <template v-slot:top>
@@ -201,7 +202,7 @@
             </v-icon>
         </template>
         <template v-slot:[`item.used_time`]="{ item, value }">
-            <div class="d-flex flex-column align-center mt-2 mb-2">
+            <div class="used-time-container d-flex flex-column mt-2 mb-2">
                 <v-chip :color="getUsedTimeColor(item)">
                     {{ formatTime(value) }}
                 </v-chip>
@@ -217,8 +218,8 @@
         <template v-slot:[`item.estimated_time`]="{ value }">
             {{ formatTime(value) }}
         </template>
-        <template v-slot:[`header.user_name`]="{}">
-            <div class="d-flex justify-center align-center">
+        <template v-slot:[`header.user_name`]="{}" v-if="!isMobileView">
+            <div class="username-header d-flex justify-center align-center">
                 <div style="flex: 4">
                     <v-autocomplete
                         v-model="nameSearch"
@@ -268,7 +269,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, nextTick } from 'vue'
+import { ref, reactive, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useTaskStore } from '@/stores/task.store.js';
 import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCountedTimesComponent.vue'
 import { useToast } from 'vue-toastification';
@@ -277,6 +278,23 @@ import useForm from '@/composables/useForm.js';
 import DialogDeleteComponent from '@/components/dialogs/DialogDeleteComponent.vue'
 import DialogCompletedComponent from '@/components/dialogs/DialogCompletedComponent.vue'
 import ToggleHeaderComponent from '@/components/ToggleHeaderComponent.vue'
+import { useDisplay } from 'vuetify'
+
+const isMobileView = ref(window.innerWidth < 960);
+
+const checkScreenSize = () => {
+    isMobileView.value = window.innerWidth < 960;
+};
+
+onMounted(() => {
+    window.addEventListener('resize', checkScreenSize);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', checkScreenSize);
+});
+
+const { smAndDown } = useDisplay()
 
 const dialog = ref(false)
 
@@ -576,6 +594,16 @@ const closeCompleted = async () => {
 
 .v-data-table__tr:nth-child(even) {
     background-color: #ffffff;
+}
+
+.used-time-container {
+    align-items: center;
+}
+
+@media (max-width: 960px) {
+    .used-time-container {
+        align-items: flex-end;
+    }
 }
 
 </style>
