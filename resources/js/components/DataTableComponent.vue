@@ -2,7 +2,7 @@
 
     <ToggleHeaderComponent :selectedHeaders="toggleHeaders" :headers="headers" @update:selectedHeaders="toggleHeaders = $event" />
 
-    <SelectedItemsCountedTimesComponent :items="selectedItems" v-if="selectedItems.length" class="mb-5" />
+    <SelectedItemsCountedTimesComponent :items="selectedItems" :sortedAndFilteredItems="sortedAndFilteredItems" v-if="selectedItems.length" class="mb-5" />
 
     <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
         <v-card>
