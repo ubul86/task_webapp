@@ -1,9 +1,9 @@
 import { publicApi } from "./api";
 
 class TaskService {
-    fetchTasks() {
+    fetchTasks(params) {
         return publicApi
-            .get("/tasks")
+            .get("/tasks", { params })
             .then((response) => response.data.data)
             .catch((error) => {
                 throw error;

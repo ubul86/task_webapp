@@ -2,13 +2,16 @@
 
 namespace App\Repositories\Interfaces;
 
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Models\Task;
 
 interface TaskRepositoryInterface
 {
-    /** @return EloquentCollection<int, Task> */
-    public function index(): EloquentCollection;
+    /**
+     * @param array $filters
+     * @return LengthAwarePaginator<Task>
+     */
+    public function index(array $filters = []): LengthAwarePaginator;
     public function show(int $id): Task;
     public function store(array $data): Task;
     public function update(int $id, array $data): Task;

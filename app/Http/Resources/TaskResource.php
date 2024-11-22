@@ -28,7 +28,7 @@ class TaskResource extends JsonResource
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
             'user_name' => $this->resource->user->name ?? '-',
-            'is_completed' => $this->resource->completed_at ? true : false,
+            'is_completed' => (bool)$this->resource->is_completed,
         ];
     }
 }
