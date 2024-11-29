@@ -28,9 +28,8 @@ class TaskRepository implements TaskRepositoryInterface
 
     public function store(array $data): Task
     {
-        $collectedData = collect($data);
         try {
-            return Task::create($collectedData->toArray());
+            return Task::create($data);
         } catch (Exception $e) {
             throw new Exception('Failed to create task: ' . $e->getMessage());
         }
