@@ -2,6 +2,20 @@
 
 ![Task App](documentations/task_app.png)
 
+# Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Minimum Requirements](#minimum-requirements)
+- [Docker Services](#docker-services)
+- [Installation With Docker](#installation-with-docker)
+- [Installation Without Docker](#installation-without-docker)
+- [Testing and Analysis Tools](#testing-and-analysis-tools)      
+- [Running Tests](#running-tests)    
+- [Docker Installation](#docker-installation)    
+- [Docker Compose Installation](#docker-compose-installation)    
+- [Example Images](#example-images)    
+
 ## Overview
 
 This is a task management application built with Laravel 10 for the backend and Vue 3 for the frontend, featuring Pinia for state management and Vuetify for UI components.
@@ -260,10 +274,6 @@ or
 ```bash
 npm run watch
 ```
-
-## Endpoints
-
-Here are the available API endpoints:
 
 ## Testing and Analysis Tools
 
