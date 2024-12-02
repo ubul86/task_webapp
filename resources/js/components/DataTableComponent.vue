@@ -1,6 +1,8 @@
 <template>
 
-    <SelectedItemsCountedTimesComponent :items="selectedItems" v-if="selectedItems.length" class="mb-5" />
+    <ToggleHeaderComponent :selectedHeaders="toggleHeaders" :headers="headers" @update:selectedHeaders="toggleHeaders = $event" />
+
+    <SelectedItemsCountedTimesComponent :items="selectedItems" :sortedAndFilteredItems="sortedAndFilteredItems" v-if="selectedItems.length" class="mb-5" />
 
     <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
         <v-card>
@@ -135,11 +137,12 @@
 
     <v-data-table
         v-model="selected"
-        :headers="headers"
+        :headers="computedHeaders"
         show-select
         :items="sortedAndFilteredItems"
         v-model:search="search"
         :filter-keys="['description', 'user_name']"
+        :mobile="smAndDown"
 
     >
         <template v-slot:top>
@@ -199,7 +202,7 @@
             </v-icon>
         </template>
         <template v-slot:[`item.used_time`]="{ item, value }">
-            <div class="d-flex flex-column align-center mt-2 mb-2">
+            <div class="used-time-container d-flex flex-column mt-2 mb-2">
                 <v-chip :color="getUsedTimeColor(item)">
                     {{ formatTime(value) }}
                 </v-chip>
@@ -215,8 +218,8 @@
         <template v-slot:[`item.estimated_time`]="{ value }">
             {{ formatTime(value) }}
         </template>
-        <template v-slot:[`header.user_name`]="{}">
-            <div class="d-flex justify-center align-center">
+        <template v-slot:[`header.user_name`]="{}" v-if="!isMobileView">
+            <div class="username-header d-flex justify-center align-center">
                 <div style="flex: 4">
                     <v-autocomplete
                         v-model="nameSearch"
@@ -266,7 +269,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, nextTick } from 'vue'
+import { ref, reactive, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useTaskStore } from '@/stores/task.store.js';
 import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCountedTimesComponent.vue'
 import { useToast } from 'vue-toastification';
@@ -274,6 +277,24 @@ import { formatTime } from '@/utils/formatTime';
 import useForm from '@/composables/useForm.js';
 import DialogDeleteComponent from '@/components/dialogs/DialogDeleteComponent.vue'
 import DialogCompletedComponent from '@/components/dialogs/DialogCompletedComponent.vue'
+import ToggleHeaderComponent from '@/components/ToggleHeaderComponent.vue'
+import { useDisplay } from 'vuetify'
+
+const isMobileView = ref(window.innerWidth < 960);
+
+const checkScreenSize = () => {
+    isMobileView.value = window.innerWidth < 960;
+};
+
+onMounted(() => {
+    window.addEventListener('resize', checkScreenSize);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', checkScreenSize);
+});
+
+const { smAndDown } = useDisplay()
 
 const dialog = ref(false)
 
@@ -339,6 +360,12 @@ const sortBy = ref(null);
 const sortDesc = ref(false);
 
 const filterIsCompleted = ref([true, false]);
+
+const toggleHeaders = ref(['id','user_name', 'description', 'estimated_time', 'used_time', 'is_completed', 'created_at', 'updated_at', 'actions']);
+
+const computedHeaders = computed(() => {
+    return headers.filter(header => toggleHeaders.value.includes(header.key));
+})
 
 const toggleSort = (key) => {
     if (sortBy.value === key) {
@@ -567,6 +594,16 @@ const closeCompleted = async () => {
 
 .v-data-table__tr:nth-child(even) {
     background-color: #ffffff;
+}
+
+.used-time-container {
+    align-items: center;
+}
+
+@media (max-width: 960px) {
+    .used-time-container {
+        align-items: flex-end;
+    }
 }
 
 </style>

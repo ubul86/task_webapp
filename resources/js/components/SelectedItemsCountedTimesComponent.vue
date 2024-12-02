@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="6">
-            <v-card class="time-card">
+            <v-card class="bg-grey-lighten-4 pt-5 pb-5 pl-5 pr-5">
                 <v-card-title>Estimated time of selected items</v-card-title>
                 <v-card-text>
                     <p>{{ totalTimes.estimated }}</p>
@@ -10,7 +10,7 @@
         </v-col>
 
         <v-col cols="6">
-            <v-card class="time-card">
+            <v-card class="bg-grey-lighten-4 pt-5 pb-5 pl-5 pr-5">
                 <v-card-title>Used time of selected items</v-card-title>
                 <v-card-text>
                     <p>{{ totalTimes.used }}</p>
@@ -29,11 +29,28 @@ const props = defineProps({
         type: Array,
         required: true,
     },
+    sortedAndFilteredItems: {
+        type: Array,
+        required: true
+    }
 });
 
+const filteredTasks = computed(() => {
+
+    if (!props.items || !props.sortedAndFilteredItems) {
+        return [];
+    }
+
+     return  props.items.filter(item =>
+            props.sortedAndFilteredItems.some(filteredItem => filteredItem.id === item.id)
+        )
+    }
+)
+
+
 const totalTimes = computed(() => {
-    const totalEstimated = props.items.reduce((sum, item) => sum + item.estimated_time, 0);
-    const totalUsed = props.items.reduce((sum, item) => sum + item.used_time, 0);
+    const totalEstimated = filteredTasks.value.reduce((sum, item) => sum + item.estimated_time, 0);
+    const totalUsed = filteredTasks.value.reduce((sum, item) => sum + item.used_time, 0);
 
     return {
         estimated: formatTime(totalEstimated),
@@ -41,11 +58,3 @@ const totalTimes = computed(() => {
     };
 });
 </script>
-<style scoped>
-.time-card {
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
-    padding: 16px;
-}
-</style>
