@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddUsedTimeRequest;
 use App\Http\Resources\TaskResource;
-use App\Models\Task;
-use App\Repositories\TaskRepository;
+use App\Repositories\Interfaces\TaskRepositoryInterface;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -15,9 +14,9 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    protected TaskRepository $taskRepository;
+    protected TaskRepositoryInterface $taskRepository;
 
-    public function __construct(TaskRepository $taskRepository)
+    public function __construct(TaskRepositoryInterface $taskRepository)
     {
         $this->taskRepository = $taskRepository;
     }
