@@ -53,6 +53,8 @@ This project uses Docker to containerize the different components of the applica
 - **phpmyadmin**: A web-based interface for managing MySQL databases. It allows developers to interact with the database, run queries, and manage tables via a user-friendly UI. The service is accessible via a browser on port 80 (or a custom port defined in the `.env` file).
 
 - **node**: This service is responsible for building and serving the Vue.js frontend application. It runs the Node.js server, compiles assets, and serves the frontend during development.
+- 
+- **selenium**: This service runs Selenium with a Chrome browser in a container to allow automated browser testing. It listens on port 4444 and is used for running Dusk tests.
 
 
 ## Installation With Docker
@@ -336,8 +338,36 @@ or
 docker exec -it {php_fpm_container} php artisan test
 ```
 
-
 This will execute all tests in the tests directory and provide a summary of test results.
+
+### Dusk Testing
+
+In addition to unit testing with PHPUnit, this project supports end-to-end testing using Laravel Dusk. To run Dusk tests, the following steps are required:
+
+#### 1. Install the necessary dependencies: Ensure that the necessary environment variables are configured in the .env.sample or .env file.
+
+Add the following lines to the .env.sample file:
+
+```env
+DUSK_DRIVER=chrome
+DUSK_DRIVER_URL=http://selenium:4444/wd/hub
+APP_URL=http://nginx  # Set the correct URL for your app when using Docker
+```
+
+#### 2. Set up Selenium: Ensure that the selenium service is included in your docker-compose.yml file (as shown above).
+
+#### 3. Install Chromium: If you're running Dusk tests inside a Docker container, ensure that Chromium is installed and accessible. This can be added to the Dockerfile for the PHP service or a separate service if necessary.
+
+#### 4. Run the Dusk tests: Once the environment is configured, run the Dusk tests with the following command:
+
+```bash
+docker-compose exec php php artisan dusk
+```
+
+This will execute all the Dusk tests in the tests/Browser directory. The tests will run using Selenium with the Chrome browser.
+
+By following these updated instructions, you can now run both PHPUnit unit tests and Laravel Dusk browser tests within the Dockerized environment.
+
 
 ## Docker Installation
 
