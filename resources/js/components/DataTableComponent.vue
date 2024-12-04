@@ -4,123 +4,9 @@
 
     <SelectedItemsCountedTimesComponent :items="selectedItems" :sortedAndFilteredItems="sortedAndFilteredItems" v-if="selectedItems.length" class="mb-5" />
 
-    <v-dialog v-model="dialogIncreasedUsedTime" max-width="500px">
-        <v-card>
-            <v-card-title>
-                <span class="text-h5">{{ formTitle }}</span>
-            </v-card-title>
-            <v-card-text>
-                <v-container>
-                    <v-row>
-                        <v-col cols="12">
-                            <v-row>
-                                <v-col cols="6">
-                                    <v-text-field
-                                        v-model.number="usedHours"
-                                        label="Used Hours"
-                                        type="number"
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="6">
-                                    <v-text-field
-                                        v-model.number="usedMinutes"
-                                        label="Used Minutes"
-                                        type="number"
-                                    ></v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-col>
-                    </v-row>
-                </v-container>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue-darken-1" variant="text" @click="closeIncreasedUsedTime">Cancel</v-btn>
-                <v-btn color="blue-darken-1" variant="text" @click="saveIncreasedUsedTime">Save</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <EditTaskDialogForm :edited-index="editedIndex" :dialog-visible="dialog" @close="close" :users="users" />
 
-    <v-dialog v-model="dialog" max-width="500px">
-        <v-card>
-            <v-card-title>
-                <span class="text-h5">{{ formTitle }}</span>
-            </v-card-title>
-            <v-card-text>
-                <v-container>
-                    <v-row>
-                        <v-col cols="12" >
-                            <v-text-field
-                                v-model="editedItem.description"
-                                label="Description"
-                                :error="!!formErrors.description"
-                                :error-messages="formErrors.description || []"
-                            ></v-text-field>
-                        </v-col>
-                        <v-col cols="12" >
-                            <v-select
-                                v-model="editedItem.user_id"
-                                :items="props.users"
-                                item-value="id"
-                                item-title="name"
-                                label="Users"
-                                :error="!!formErrors.user_id"
-                                :error-messages="formErrors.user_id || []"
-                            ></v-select>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-row>
-                                <v-col cols="6">
-                                    <v-text-field
-                                        v-model.number="estimatedHours"
-                                        label="Estimated Hours"
-                                        type="number"
-                                        hide-details
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="6">
-                                    <v-text-field
-                                        v-model.number="estimatedMinutes"
-                                        label="Estimated Minutes"
-                                        type="number"
-                                        hide-details
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="12" v-if="formErrors.estimated_time">
-                                    <span class="text-red">{{ formErrors.estimated_time[0] }}</span>
-                                </v-col>
-                            </v-row>
-                        </v-col>
-
-                        <v-col cols="12">
-                            <v-row>
-                                <v-col cols="6">
-                                    <v-text-field
-                                        v-model.number="usedHours"
-                                        label="Used Hours"
-                                        type="number"
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="6">
-                                    <v-text-field
-                                        v-model.number="usedMinutes"
-                                        label="Used Minutes"
-                                        type="number"
-                                    ></v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-col>
-                    </v-row>
-                </v-container>
-            </v-card-text>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-                <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
-
+    <IncreaseUsedTimeDialogForm :edited-index="editedIndex" :dialog-visible="dialogIncreasedUsedTime" @close="closeIncreasedUsedTime" />
 
     <v-dialog v-model="dialogBulk" max-width="500px">
         <v-card>
@@ -274,11 +160,13 @@ import { useTaskStore } from '@/stores/task.store.js';
 import SelectedItemsCountedTimesComponent from '@/components/SelectedItemsCountedTimesComponent.vue'
 import { useToast } from 'vue-toastification';
 import { formatTime } from '@/utils/formatTime';
-import useForm from '@/composables/useForm.js';
+
 import DialogDeleteComponent from '@/components/dialogs/DialogDeleteComponent.vue'
 import DialogCompletedComponent from '@/components/dialogs/DialogCompletedComponent.vue'
 import ToggleHeaderComponent from '@/components/ToggleHeaderComponent.vue'
 import { useDisplay } from 'vuetify'
+import EditTaskDialogForm from '@/components/dialogs/EditTaskDialogForm.vue'
+import IncreaseUsedTimeDialogForm from '@/components/dialogs/IncreaseUsedTimeDialogForm.vue'
 
 const isMobileView = ref(window.innerWidth < 960);
 
@@ -308,7 +196,6 @@ const dialogBulkText = computed(() =>
 const dialogIncreasedUsedTime = ref(false);
 
 const toast = useToast()
-const { formErrors, resetErrors, handleApiError } = useForm();
 
 const taskStore = useTaskStore();
 
@@ -344,13 +231,6 @@ const defaultItem = {
     estimated_time: null,
     used_time: null,
 }
-
-const formTitle = computed(() => {
-    if (dialogIncreasedUsedTime.value) {
-        return 'Increase Used Time';
-    }
-    return editedIndex.value === -1 ? 'New Task' : 'Edit Task';
-})
 
 const search = ref('');
 
@@ -417,7 +297,6 @@ const selectedItems = computed(() => {
 
 const editItem = (item) => {
     editedIndex.value = taskStore.tasks.indexOf(item)
-    Object.assign(editedItem, item)
     dialog.value = true
 }
 
@@ -427,22 +306,16 @@ const openDialog = () => {
 
 const openUsedTimeDialog = (item) => {
     editedIndex.value = taskStore.tasks.indexOf(item);
-    Object.assign(editedItem, item);
-    editedItem.used_time = 0;
     dialogIncreasedUsedTime.value = true;
 }
 
 const close = async () => {
     dialog.value = false
-    await nextTick()
-    Object.assign(editedItem, defaultItem)
     editedIndex.value = -1
 }
 
 const closeIncreasedUsedTime = async () => {
     dialogIncreasedUsedTime.value = false
-    await nextTick()
-    Object.assign(editedItem, defaultItem)
     editedIndex.value = -1
 }
 
@@ -450,34 +323,6 @@ const closeIncreasedUsedTime = async () => {
 const closeDialogBulk = async () => {
     dialogBulkType.value = '';
     dialogBulk.value = false;
-}
-
-const saveIncreasedUsedTime = async () => {
-    try {
-        await taskStore.increaseUsedTime(editedItem.id, editedItem.used_time)
-        closeIncreasedUsedTime();
-    }
-    catch (error) {
-        toast.error(error.response.data.message);
-    }
-}
-
-const save = async () => {
-    resetErrors();
-    try {
-        if (editedIndex.value > -1) {
-            await taskStore.update(editedIndex.value, editedItem);
-            toast.success('You have successfully edited the item!');
-        } else {
-            await taskStore.store(editedItem)
-            toast.success('You have successfully created a new item!');
-        }
-        close()
-    }
-    catch(error) {
-        handleApiError(error);
-        toast.error(error.response.data.message);
-    }
 }
 
 const getUsedTimeColor = (item) => {
@@ -521,37 +366,6 @@ const saveDialogBulk = async () => {
     }
 }
 
-const estimatedHours = computed({
-    get: () => Math.floor((editedItem.estimated_time || 0) / 3600),
-    set: (value) => {
-        const minutes = estimatedMinutes.value;
-        editedItem.estimated_time = value * 3600 + minutes * 60;
-    },
-});
-
-const estimatedMinutes = computed({
-    get: () => Math.floor(((editedItem.estimated_time || 0) % 3600) / 60),
-    set: (value) => {
-        const hours = estimatedHours.value;
-        editedItem.estimated_time = hours * 3600 + value * 60;
-    },
-});
-
-const usedHours = computed({
-    get: () => Math.floor((editedItem.used_time || 0) / 3600),
-    set: (value) => {
-        const minutes = usedMinutes.value;
-        editedItem.used_time = value * 3600 + minutes * 60;
-    },
-});
-
-const usedMinutes = computed({
-    get: () => Math.floor(((editedItem.used_time || 0) % 3600) / 60),
-    set: (value) => {
-        const hours = usedHours.value;
-        editedItem.used_time = hours * 3600 + value * 60;
-    },
-});
 
 const isDialogDeleteOpen = ref(false);
 
